@@ -22,7 +22,7 @@ typedef struct node {
     int has_ptrn; // has pattern
     struct node *next; 
     struct node *next_book; 
-    struct node *next_freq_search; // next frequent 
+    struct node *next_freq_search; // next frequency search 
 } node_t;
 
 typedef struct book {
@@ -43,7 +43,7 @@ node_t *same_head = NULL;
 node_t *same_tail = NULL;
 pthread_mutex_t shared_list_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-book_t *books_list = NULL; // Head of the books list
+book_t *books_list = NULL; // head of  books list
 pthread_mutex_t books_list_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 char *search_ptrn = NULL;
@@ -58,7 +58,7 @@ void clean_line(char *line);
 int main(int argc, char *argv[]) {
     int listen_port = 0;
     int opt;
-    while ((opt = getopt(argc, argv, "l:p:")) != -1) {
+    while((opt = getopt(argc, argv, "l:p:")) != -1) {
         switch (opt) {
             case 'l':
                 listen_port = atoi(optarg);
@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
     struct sockaddr_in address;
     int addrlen = sizeof(address);
 
-    // make the server socket
+    //make the server socket
     if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
         perror("socket failed");
         exit(EXIT_FAILURE);
@@ -93,7 +93,7 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    // bind to the arg port
+    // bind to port to the arg that the user gives hwen they run the program 
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY; // accept any incoming interface
     address.sin_port = htons(listen_port);
@@ -109,7 +109,7 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    printf("Server listening on port %d\n", listen_port);
+    printf("Server listening on port: %d\n", listen_port);
 
     pthread_t analysis_threads[ANALYSIS_THREAD_COUNT];
     for (int i = 0; i < ANALYSIS_THREAD_COUNT; i++) {
@@ -155,19 +155,19 @@ int main(int argc, char *argv[]) {
 
 void remove_bom(char *str) {
     unsigned char *ustr = (unsigned char *)str;
-    if (ustr[0] == 0xEF && ustr[1] == 0xBB && ustr[2] == 0xBF) {
-        // Shift the string 3 bytes to the left to remove BOM
+    if(ustr[0] == 0xEF && ustr[1] == 0xBB && ustr[2] == 0xBF) {
+        // byte order magic over here. it fixed my case issue that i was running into. 
         memmove(str, str + 3, strlen(str + 3) + 1);
     }
 }
 
 char *str_to_lower(const char *str) {
     char *lower_str = strdup(str);
-    if (lower_str == NULL) {
+    if(lower_str == NULL) {
         perror("strdup");
         exit(EXIT_FAILURE);
     }
-    for (char *p = lower_str; *p; ++p) {
+    for(char *p = lower_str; *p; ++p) {
         *p = tolower(*p);
     }
     return lower_str;
@@ -175,8 +175,8 @@ char *str_to_lower(const char *str) {
 
 void clean_line(char *line) {
     char *src = line, *dst = line;
-    while (*src) {
-        if (isprint((unsigned char)*src) || isspace((unsigned char)*src)) {
+    while(*src) {
+        if(isprint((unsigned char)*src) || isspace((unsigned char)*src)) {
             *dst++ = *src;
         }
         src++;
@@ -210,29 +210,29 @@ void *client_handler(void *arg) {
     // Read data from the socket
     while (1) {
         bytes_read = recv(socket_fd, recv_buffer, BUFFER_SIZE - 1, 0);
-        if (bytes_read > 0) {
+        if(bytes_read > 0) {
             int i;
-            for (i = 0; i < bytes_read; i++) {
+            for(i = 0; i < bytes_read; i++) {
                 char c = recv_buffer[i];
 
-                if (c == '\n' || c == '\r') {
+                if(c == '\n' || c == '\r') {
                     if (line_buffer_len == 0) {
-                        continue; // Skip empty lines
+                        continue; // 
                     }
 
                     line_buffer[line_buffer_len] = '\0';
 
                     clean_line(line_buffer);
 
-                    if (first_line) {
+                    if(first_line) {
                         remove_bom(line_buffer);
                     }
 
-                    // Create a new node
+                    // new node
                     node_t *new_node = malloc(sizeof(node_t));
                     new_node->line = strdup(line_buffer);
 
-                    // Case-insensitive pattern matching
+                    // pattern matching (MIGHT BE WRONG. NOT SURE WHAT KIND OF PATTERN MATCHING IT WANTS!)
                     char *lower_line = str_to_lower(line_buffer);
                     char *lower_pattern = str_to_lower(search_ptrn);
                     new_node->has_ptrn = (strstr(lower_line, lower_pattern) != NULL);
@@ -245,7 +245,7 @@ void *client_handler(void *arg) {
 
                     pthread_mutex_lock(&shared_list_mutex);
 
-                    if (same_tail == NULL) {
+                    if(same_tail == NULL) {
                         same_head = same_tail = new_node;
                     } else {
                         same_tail->next = new_node;
@@ -254,11 +254,11 @@ void *client_handler(void *arg) {
 
                     pthread_mutex_unlock(&shared_list_mutex);
 
-                    if (first_line) {
+                    if(first_line) {
                         book_title = strdup(line_buffer);
                         first_line = 0;
 
-                        // Create a new book entry and add to the list
+                        // a new book entry. addd it to the list
                         book_t *new_book = malloc(sizeof(book_t));
                         new_book->con_order = con_order;
                         new_book->title = strdup(book_title);
@@ -286,18 +286,18 @@ void *client_handler(void *arg) {
                         pthread_mutex_unlock(&books_list_mutex);
                     }
 
-                    // Debugging statements
-                    //printf("Processed line: %s\n", line_buffer);
+                    // debug prints
+                    //printf("Line proccessed: %s\n", line_buffer);
                     //printf("Pattern '%s' found: %s\n", search_ptrn, new_node->has_ptrn ? "Yes" : "No");
                     //printf("Added node: %s\n", line_buffer);
 
                     line_buffer_len = 0;
                     memset(line_buffer, 0, sizeof(line_buffer));
                 } else {
-                    if (line_buffer_len < sizeof(line_buffer) - 1) {
+                    if(line_buffer_len < sizeof(line_buffer) - 1) {
                         line_buffer[line_buffer_len++] = c;
                     } else {
-                        // Line is too long
+                        // line 2 long
                         fprintf(stderr, "Line too long, discarding\n");
                         line_buffer_len = 0;
                     }
@@ -305,8 +305,7 @@ void *client_handler(void *arg) {
             }
 
         } else if (bytes_read == 0) {
-            // Connection closed by client
-            printf("Connection closed by client %d\n", con_order);
+            printf("Connection closed %d\n", con_order);
             break;
         } else {
             if (errno == EWOULDBLOCK || errno == EAGAIN) {
@@ -319,12 +318,12 @@ void *client_handler(void *arg) {
         }
     }
 
-    // When connection closes, write the received book to a file
+    // connection is closed. output that book_xx.txt file. ORDERED
     char filename[256];
     snprintf(filename, sizeof(filename), "book_%02d.txt", con_order);
 
     FILE *fp = fopen(filename, "w");
-    if (fp == NULL) {
+    if(fp == NULL) {
         perror("fopen");
     } else {
         pthread_mutex_lock(&books_list_mutex);
@@ -337,7 +336,7 @@ void *client_handler(void *arg) {
         }
         pthread_mutex_unlock(&books_list_mutex);
 
-        if (book != NULL) {
+        if(book != NULL) {
             node_t *current = book->head;
             while (current != NULL) {
                 fprintf(fp, "%s\n", current->line);
@@ -358,7 +357,7 @@ void *analysis_thread_func(void *arg) {
 
         // Lock!!!
         static pthread_mutex_t output_mutex = PTHREAD_MUTEX_INITIALIZER;
-        if (pthread_mutex_trylock(&output_mutex) == 0) {
+        if(pthread_mutex_trylock(&output_mutex) == 0) {
             pthread_mutex_lock(&books_list_mutex);
             book_t *book = books_list;
             while (book != NULL) {
@@ -398,7 +397,7 @@ void *analysis_thread_func(void *arg) {
 
             // print sorted books
             printf("\nBooks sorted by occurrences of '%s':\n", search_ptrn);
-            for (int i = 0; i < book_count; i++) {
+            for(int i = 0; i < book_count; i++) {
                 printf("Book %02d: '%s' - %d occurrences\n", book_array[i]->con_order, book_array[i]->title, book_array[i]->search_count);
             }
             printf("\n");

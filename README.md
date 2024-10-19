@@ -9,8 +9,8 @@
 `./assignment3 -l 1234 -p "love"`
 
 ### Running clients:
+(in a new terminal window)
 `nc localhost 1234 < file.txt`
 Stop the client:
 `CTRL + C`
-(after stopping a client, the server will make a book_xx.txt file). 
-
+(after stopping a client, the server will make a book_xx.txt file). ### 
