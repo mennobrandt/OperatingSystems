@@ -287,9 +287,9 @@ void *client_handler(void *arg) {
                     }
 
                     // Debugging statements
-                    printf("Processed line: %s\n", line_buffer);
-                    printf("Pattern '%s' found: %s\n", search_ptrn, new_node->has_ptrn ? "Yes" : "No");
-                    printf("Added node: %s\n", line_buffer);
+                    //printf("Processed line: %s\n", line_buffer);
+                    //printf("Pattern '%s' found: %s\n", search_ptrn, new_node->has_ptrn ? "Yes" : "No");
+                    //printf("Added node: %s\n", line_buffer);
 
                     line_buffer_len = 0;
                     memset(line_buffer, 0, sizeof(line_buffer));
