@@ -11,7 +11,7 @@
 #include <sys/types.h>
 #include <sys/time.h>    
 #include <signal.h>
-#include <ctype.h>       // For tolower, isprint, isspace
+#include <ctype.h>       // tolower + isprint + isspace
 #include <bits/getopt_core.h>
 
 #define BUFFER_SIZE 1024
