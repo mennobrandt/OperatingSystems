@@ -233,7 +233,7 @@ void *client_handler(void *arg) {
                     new_node->line = strdup(line_buffer);
 
                     // pattern matching
-                    // case sensitive.
+                    // case sensitive. (because of strstr)
                     new_node->has_ptrn = (strstr(line_buffer, search_ptrn) != NULL);
 
                     new_node->next = NULL;
@@ -350,9 +350,8 @@ void *client_handler(void *arg) {
 
 void *analysis_thread_func(void *arg) {
     while (1) {
-        sleep(5); ///////// can change.........
+        sleep(5); 
 
-        // Lock!!!
         static pthread_mutex_t output_mutex = PTHREAD_MUTEX_INITIALIZER;
         if(pthread_mutex_trylock(&output_mutex) == 0) {
             pthread_mutex_lock(&books_list_mutex);
@@ -371,7 +370,6 @@ void *analysis_thread_func(void *arg) {
             }
             pthread_mutex_unlock(&books_list_mutex);
 
-            // count books
             int book_count = 0;
             pthread_mutex_lock(&books_list_mutex);
             book = books_list;
@@ -388,16 +386,20 @@ void *analysis_thread_func(void *arg) {
                 book = book->next;
             }
             pthread_mutex_unlock(&books_list_mutex);
-
-            // sort array
             qsort(book_array, book_count, sizeof(book_t *), comp_books);
 
-            // print sorted books
-            printf("\nBooks sorted by occurrences of '%s':\n", search_ptrn);
+            // print in right format... with rank
+            printf("\n");
             for(int i = 0; i < book_count; i++) {
-                printf("Book %02d: '%s' - %d occurrences\n", book_array[i]->con_order, book_array[i]->title, book_array[i]->search_count);
+                int rank = i + 1;
+                printf("%d --> Book: %s, Pattern: \"%s\", Frequency: %d.\n",
+                       rank,
+                       book_array[i]->title,
+                       search_ptrn,
+                       book_array[i]->search_count);
             }
             printf("\n");
+
             free(book_array);
             pthread_mutex_unlock(&output_mutex);
         } else {
