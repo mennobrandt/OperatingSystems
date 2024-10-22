@@ -79,7 +79,7 @@ int main(int argc, char *argv[]) {
 
     int server_fd;
     struct sockaddr_in address;
-    int addrlen = sizeof(address);
+    //int addrlen = sizeof(address);
 
     //make the server socket
     if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
