@@ -161,17 +161,17 @@ void remove_bom(char *str) {
     }
 }
 
-char *str_to_lower(const char *str) {
-    char *lower_str = strdup(str);
-    if(lower_str == NULL) {
-        perror("strdup");
-        exit(EXIT_FAILURE);
-    }
-    for(char *p = lower_str; *p; ++p) {
-        *p = tolower(*p);
-    }
-    return lower_str;
-}
+// char *str_to_lower(const char *str) {
+//     char *lower_str = strdup(str);
+//     if(lower_str == NULL) {
+//         perror("strdup");
+//         exit(EXIT_FAILURE);
+//     }
+//     for(char *p = lower_str; *p; ++p) {
+//         *p = tolower(*p);
+//     }
+//     return lower_str;
+// }
 
 void clean_line(char *line) {
     char *src = line, *dst = line;
@@ -232,12 +232,9 @@ void *client_handler(void *arg) {
                     node_t *new_node = malloc(sizeof(node_t));
                     new_node->line = strdup(line_buffer);
 
-                    // pattern matching (MIGHT BE WRONG. NOT SURE WHAT KIND OF PATTERN MATCHING IT WANTS!)
-                    char *lower_line = str_to_lower(line_buffer);
-                    char *lower_pattern = str_to_lower(search_ptrn);
-                    new_node->has_ptrn = (strstr(lower_line, lower_pattern) != NULL);
-                    free(lower_line);
-                    free(lower_pattern);
+                    // pattern matching
+                    // case sensitive.
+                    new_node->has_ptrn = (strstr(line_buffer, search_ptrn) != NULL);
 
                     new_node->next = NULL;
                     new_node->next_book = NULL;
