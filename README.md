@@ -1,4 +1,9 @@
 # _A3: Multi-Threaded Network Server for Pattern Analysis_
+### 0. Background:
+- I am counting the number of lines, in which a pattern occurs. Not the total number of occurences. Meaning, a line with multiple uses of the pattern, will only be counted as +1. 
+- Pattern matching is case sensitive. For example, "love" != "Love". 
+- If a pattern is part of another word, it will be counted. For example, "love" == "beloved".  
+
 ### 1. Building the program:
 - Clear up existing files, with:
 ```
