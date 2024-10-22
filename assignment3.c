@@ -250,6 +250,7 @@ void *client_handler(void *arg) {
                     }
 
                     pthread_mutex_unlock(&shared_list_mutex);
+                    printf("Node added: %s\n", new_node->line);
 
                     if(first_line) {
                         book_title = strdup(line_buffer);
@@ -295,7 +296,7 @@ void *client_handler(void *arg) {
                         line_buffer[line_buffer_len++] = c;
                     } else {
                         // line 2 long
-                        fprintf(stderr, "Line too long, discarding\n");
+                        fprintf(stderr, "Line too long\n");
                         line_buffer_len = 0;
                     }
                 }
@@ -389,7 +390,7 @@ void *analysis_thread_func(void *arg) {
             qsort(book_array, book_count, sizeof(book_t *), comp_books);
 
             // print in right format... with rank
-            printf("\n");
+            printf("\nBook titles sorted by the number of lines, in which the pattern \"%s\" appears:\n", search_ptrn);
             for(int i = 0; i < book_count; i++) {
                 int rank = i + 1;
                 printf("%d --> Book: %s, Pattern: \"%s\", Frequency: %d.\n",
